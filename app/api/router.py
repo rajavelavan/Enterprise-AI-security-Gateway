@@ -9,10 +9,11 @@ from __future__ import annotations
 import logging
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
+from app.core.cache import TenantCache
 from app.dlp.composite_scanner import composite_scanner
 from app.proxy.forwarder import forward_to_llm
 from app.telemetry.tracing import get_tracer
@@ -20,6 +21,9 @@ from app.telemetry.tracing import get_tracer
 logger = logging.getLogger(__name__)
 router = APIRouter()
 tracer = get_tracer(__name__)
+
+# Global cache for tenant policies and API keys
+tenant_cache: TenantCache[dict] = TenantCache()
 
 
 # ──────────────────── Request / Response Models ────────────────────
@@ -175,8 +179,27 @@ class KeywordReloadResponse(BaseModel):
         },
     },
 )
-async def process_chat(payload: ChatPayload) -> ChatResponse:
+async def process_chat(
+    payload: ChatPayload,
+    x_tenant_id: str | None = Header(default=None, description="Unique tenant identifier for fetching policies."),
+) -> ChatResponse:
     """Scan the incoming prompt and forward to the LLM after DLP processing."""
+    if not x_tenant_id:
+        raise HTTPException(
+            status_code=400,
+            detail="X-Tenant-ID header is missing."
+        )
+
+    # Fetch tenant specific policies or keys from the cache
+    tenant_data = await tenant_cache.get(x_tenant_id)
+    if not tenant_data:
+        # Simulate fetching tenant policy from a database
+        tenant_data = {
+            "tenant_id": x_tenant_id,
+            "policy": "default",
+        }
+        await tenant_cache.set(x_tenant_id, tenant_data)
+
     dlp_mode = settings.DLP_MODE
 
     with tracer.start_as_current_span("dlp_scan") as span:
