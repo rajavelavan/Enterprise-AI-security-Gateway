@@ -1,1 +1,1 @@
-# Empty init files for package structure
+"""Enterprise AI Security Gateway application package."""

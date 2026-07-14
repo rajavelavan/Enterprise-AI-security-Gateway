@@ -1,1 +1,1 @@
-# Empty init files for package structure
+"""Telemetry module — OpenTelemetry tracing and observability."""

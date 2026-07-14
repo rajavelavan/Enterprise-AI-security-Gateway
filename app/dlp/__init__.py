@@ -1,1 +1,1 @@
-# Empty init files for package structure
+"""DLP scanning module — keyword and PII pattern detection engines."""

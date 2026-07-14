@@ -1,1 +1,1 @@
-# Empty init files for package structure
+"""API routing module — HTTP endpoint definitions."""

@@ -1,1 +1,1 @@
-# Empty init files for package structure
+"""Core configuration module — settings and environment management."""

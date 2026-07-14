@@ -1,0 +1,3 @@
+[MAIN]
+# pyahocorasick is a C extension; allow pylint to inspect it at runtime
+extension-pkg-allow-list=ahocorasick
