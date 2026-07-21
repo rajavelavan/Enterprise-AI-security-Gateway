@@ -181,7 +181,7 @@ class KeywordReloadResponse(BaseModel):
 )
 async def process_chat(
     payload: ChatPayload,
-    x_tenant_id: str | None = Header(default=None, description="Unique tenant identifier for fetching policies."),
+    x_tenant_id: str = Header(..., description="Unique tenant identifier for fetching policies."),
 ) -> ChatResponse:
     """Scan the incoming prompt and forward to the LLM after DLP processing."""
     if not x_tenant_id:
